@@ -55,21 +55,40 @@ class ViewController: UIViewController {
                                                  context: nil)
         }
         let duration = (CFAbsoluteTimeGetCurrent() - startTime) * 1000.0;
+        print("\(rect)")
         print("使用oldWay计算\(value)次，总耗时\(duration) ms")
     }
     
     func newWay(value: Int) {
-        let constraintRect = CGSize.init(width: 100, height: 60)
+        let constraintSize = CGSize.init(width: 100, height: 60)
         var title = ""
         var rect = CGRect.zero
         print("newWay开始计算了")
         let startTime = CFAbsoluteTimeGetCurrent();
         for i in 0...value {
             title = "iOS性能优化之计算多行Label高度的新方法\(i)"
-            rect = title.boundingRectFast(withMaxSize: constraintRect, font: UIFont.boldSystemFont(ofSize: 16))
+            rect = title.boundingRectFast(withMaxSize: constraintSize, font: UIFont.boldSystemFont(ofSize: 16))
         }
         let duration = (CFAbsoluteTimeGetCurrent() - startTime) * 1000.0;
+        print("\(rect)")
         print("使用newWay计算\(value)次，总耗时\(duration) ms")
     }
+    
+    func useWays() {
+        let text = "iOS性能优化之计算多行Label高度的新方法,iOS性能优化之计算多行Label高度的新方法";
+        //限定最大行数场景下，计算Label高度
+        let maxLine = 3
+        //系统方法
+        let singleLineHeight = 20
+        let maxHeight = CGFloat(maxLine * singleLineHeight)
+        let rect1 = text.boundingRect(with: CGSize(width: UIScreen.main.bounds.size.width, height: maxHeight),
+                                      options: .usesLineFragmentOrigin,
+                                      attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 16)],
+                                      context: nil).size.width
+        
+        let rect2 = text.boundingRectFast(withMaxWidth: UIScreen.main.bounds.size.width, font: UIFont.boldSystemFont(ofSize: 16), maxLine: 3)
+    }
 }
+
+
 

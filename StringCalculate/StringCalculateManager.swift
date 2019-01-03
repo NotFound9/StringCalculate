@@ -20,7 +20,7 @@ class StringCalculateManager {
         let manager = FileManager.default
         var filePath = manager.urls(for: .documentDirectory, in: .userDomainMask).first
         filePath!.appendPathComponent("font_dictionary.json")
-//        print("font_dictionary.json的路径是===\(filePath!)")
+        print("font_dictionary.json的路径是===\(filePath!)")
         return filePath!
     }()
     
@@ -51,16 +51,45 @@ class StringCalculateManager {
         saveFontDictionaryToDisk()//存入本地json
         return widthDictionary
     }
-    //计算Label的bounds
-    func calculateSize(withString string: String, size: CGSize, font: UIFont) -> CGRect {
-        var widthDictionary = [String: CGFloat]()
-        let fontKey = "\(font.fontName)-\(font.pointSize)"
-        if let dictionary =  StringCalculateManager.shared.fontDictionary[fontKey] {
-            widthDictionary = dictionary
-        } else {
-            widthDictionary = StringCalculateManager.shared.createNewFont(font: font)
-        }
+    //限定最大行数的场景下计算Label的bounds
+    func calculateSize(withString string: String, maxWidth: CGFloat, font: UIFont, maxLine: Int) -> CGRect {
+        let totalWidth: CGFloat = calculateTotalWidth(string: string, font: font)
+        var widthDictionary = fetchWidthDictionaryWith(font)
+        let singleLineHeight = widthDictionary["singleLineHeight"]!
+        let numsOfLine = ceil(totalWidth/maxWidth)//行数
+        let maxLineCGFloat = CGFloat(maxLine)//最大
+        let resultwidth = numsOfLine <= 1 ? totalWidth : maxWidth//小于最大宽度时，取实际宽度的值
+        let resultLine = numsOfLine < maxLineCGFloat ? numsOfLine : maxLineCGFloat
+        return CGRect.init(x: 0, y: 0, width: resultwidth, height: resultLine * singleLineHeight)
+    }
+    
+    //行数不限的场景下计算Label的bounds
+    func calculateSize(withString string: String, maxWidth: CGFloat, font: UIFont) -> CGRect {
+        let totalWidth: CGFloat = calculateTotalWidth(string: string, font: font)
+        var widthDictionary = fetchWidthDictionaryWith(font)
+        let singleLineHeight = widthDictionary["singleLineHeight"]!
+        let numsOfLine = ceil(totalWidth/maxWidth)//行数
+        let resultwidth = numsOfLine <= 1 ? totalWidth : maxWidth//小于最大宽度时，取实际宽度的值
+        return CGRect.init(x: 0, y: 0, width: resultwidth, height: numsOfLine * singleLineHeight)
+    }
+    
+    //限定最大高度的场景下计算Label的bounds
+    func calculateSize(withString string: String, maxSize: CGSize, font: UIFont) -> CGRect {
+        let totalWidth: CGFloat = calculateTotalWidth(string: string, font: font)
+        var widthDictionary = fetchWidthDictionaryWith(font)
+        let singleLineHeight = widthDictionary["singleLineHeight"]!
+        let numsOfLine = ceil(totalWidth/maxSize.width)//行数
+        let maxLineCGFloat = floor(maxSize.height/singleLineHeight)
+        let resultwidth = numsOfLine <= 1 ? totalWidth : maxSize.width//小于最大宽度时，取实际宽度的值
+        let resultLine = numsOfLine < maxLineCGFloat ? numsOfLine : maxLineCGFloat
+        return CGRect.init(x: 0, y: 0, width: resultwidth, height: resultLine * singleLineHeight)
+    }
+    
+    //计算排版在一行的总宽度
+    func calculateTotalWidth(string: String, font: UIFont) -> CGFloat {
         var totalWidth: CGFloat = 0
+        let fontKey = "\(font.fontName)-\(font.pointSize)"
+        var widthDictionary = fetchWidthDictionaryWith(font)
         let chineseWidth = widthDictionary["中"]!
         for character in string {
             if "\u{4E00}" <= character  && character <= "\u{9FA5}" {//中文
@@ -82,11 +111,19 @@ class StringCalculateManager {
         if numsNeedToSave > 10 {
             saveFontDictionaryToDisk()
         }
-        let singleLineHeight = widthDictionary["singleLineHeight"]!
-        let numsOfLine = ceil(totalWidth/size.width)//行数
-        let resultwidth = numsOfLine <= 1 ? totalWidth : size.width//小于最大宽度时，取实际宽度的值
-        let resultHeight = (singleLineHeight*numsOfLine) > size.height ? size.height : (singleLineHeight*numsOfLine)//计算结果超出最大高度时，取最大高度的值
-        return CGRect.init(x: 0, y: 0, width: resultwidth, height: resultHeight)
+        return totalWidth
+    }
+    
+    //获取字体对应的宽度字典
+    func fetchWidthDictionaryWith(_ font: UIFont) -> [String: CGFloat] {
+        var widthDictionary = [String: CGFloat]()
+        let fontKey = "\(font.fontName)-\(font.pointSize)"
+        if let dictionary =  StringCalculateManager.shared.fontDictionary[fontKey] {
+            widthDictionary = dictionary
+        } else {
+            widthDictionary = StringCalculateManager.shared.createNewFont(font: font)
+        }
+        return widthDictionary
     }
     
     let queue = DispatchQueue(label: "com.StringCalculateManager.queue")
@@ -120,16 +157,29 @@ class StringCalculateManager {
                 return
             }
             fontDictionary = dict
-//            print("font_dictionarys读取成功,font_dictionarys=\(fontDictionary)")
+            print(fontDictionary)
+            print("font_dictionarys读取成功,font_dictionarys=\(fontDictionary)")
         } catch {
-            print("磁盘中不存在font_dictionary.json文件或读取失败")
+            print("第一次运行时font_dictionary不存在或者读取失败")
         }
     }
 }
 
 extension String {
+    //限制最大行数的场景下，计算Label的bounds
+    func boundingRectFast(withMaxWidth width: CGFloat, font: UIFont, maxLine: Int) -> CGRect {
+        let rect = StringCalculateManager.shared.calculateSize(withString: self, maxWidth: width, font: font, maxLine: maxLine)
+        return rect
+    }
+    //行数不限的场景下，计算Label的bounds
+    func boundingRectFast(withMaxWidth width: CGFloat, font: UIFont) -> CGRect {
+        let rect = StringCalculateManager.shared.calculateSize(withString: self, maxWidth: width, font: font)
+        return rect
+    }
+    
+    //限定最大高度的场景下，计算Label的bounds
     func boundingRectFast(withMaxSize size: CGSize, font: UIFont) -> CGRect {
-        let rect = StringCalculateManager.shared.calculateSize(withString: self, size: size, font: font)
+        let rect = StringCalculateManager.shared.calculateSize(withString: self, maxSize: size, font: font)
         return rect
     }
 }
