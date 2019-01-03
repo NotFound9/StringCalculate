@@ -2,7 +2,6 @@
 
 一种更加方便和高效计算多行Label高度的新方法
 
-
 与系统的提供的boundingRect相比，优点主要有以下两点：
 
 1.耗时较少
@@ -27,5 +26,7 @@ let rect = text.boundingRectFast(withMaxWidth: UIScreen.main.bounds.size.width,
                                           font: UIFont.boldSystemFont(ofSize: 16), 
                                           maxLine: maxLine)
 ```
-
                    
+介绍文章：http://mp.weixin.qq.com/s?__biz=MzU3NTY3MTQzMg==&mid=2247484307&idx=1&sn=06d33d349ab6019b25a268f316ce7eb9&chksm=fd1ede74ca6957628d59c222767105b54fcd57b9efb085e868dae995fcd46d50e4023d4e0d7c&mpshare=1&scene=23&srcid=0103uUtd8RIuQxhWoWbXEcTh#rd
+
+有什么问题或者建议欢迎加我微信ruiwendelll，我们一起讨论，一起学习进步，谢谢了！
