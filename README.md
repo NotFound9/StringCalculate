@@ -23,7 +23,9 @@ let rect = text.boundingRect(with: CGSize(width: UIScreen.main.bounds.size.width
 ```
 但是在使用这种新方法计算时，我们只需要指定最大高度就行了，类似于这样：
 ```
-let rect = text.boundingRectFast(withMaxWidth: UIScreen.main.bounds.size.width, font: UIFont.boldSystemFont(ofSize: 16), maxLine: maxLine)
+let rect = text.boundingRectFast(withMaxWidth: UIScreen.main.bounds.size.width, 
+                                          font: UIFont.boldSystemFont(ofSize: 16), 
+                                          maxLine: maxLine)
 ```
 
                    
