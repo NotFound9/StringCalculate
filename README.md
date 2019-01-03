@@ -27,7 +27,7 @@ let rect = text.boundingRectFast(withMaxWidth: UIScreen.main.bounds.size.width,
                                           maxLine: maxLine)
 ```
                    
-介绍文章：http://mp.weixin.qq.com/s?__biz=MzU3NTY3MTQzMg==&mid=2247484307&idx=1&sn=06d33d349ab6019b25a268f316ce7eb9&chksm=fd1ede74ca6957628d59c222767105b54fcd57b9efb085e868dae995fcd46d50e4023d4e0d7c&mpshare=1&scene=23&srcid=0103uUtd8RIuQxhWoWbXEcTh#rd
+介绍文章：https://mp.weixin.qq.com/s/zHAlxALPMFZLv8M8bJaRKA
 
 有问题或者建议欢迎加我微信ruiwendelll，我们一起探讨学习，谢谢了！
 
